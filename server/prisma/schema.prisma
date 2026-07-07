@@ -1,0 +1,82 @@
+// OurStory — a private couple's memory site. PostgreSQL on Neon.
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// One of the two people. No public sign-up — accounts are seeded.
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  passwordHash String
+  avatarUrl    String   @default("")
+  createdAt    DateTime @default(now())
+  memories     Memory[]
+}
+
+// Key/value app settings (relationship start date, names, quotes…).
+model Setting {
+  key   String @id
+  value String @default("")
+}
+
+// A milestone on the relationship timeline.
+model Milestone {
+  id          String   @id @default(cuid())
+  title       String
+  date        String // YYYY-MM-DD
+  description String   @default("")
+  location    String   @default("")
+  tags        String   @default("[]") // JSON string[]
+  media       String   @default("[]") // JSON [{ type, url, thumbUrl }]
+  createdAt   DateTime @default(now())
+  @@index([date])
+}
+
+// A daily memory / journal entry — the core of the site.
+model Memory {
+  id             String    @id @default(cuid())
+  title          String
+  date           String // YYYY-MM-DD
+  time           String    @default("")
+  location       String    @default("")
+  lat            Float?
+  lng            Float?
+  mood           String    @default("")
+  weather        String    @default("")
+  story          String    @default("")
+  favoriteMoment String    @default("")
+  funnyMoment    String    @default("")
+  food           String    @default("")
+  songs          String    @default("")
+  insideJokes    String    @default("")
+  rating         Int       @default(0) // out of 10
+  notesA         String    @default("") // note from person 1
+  notesB         String    @default("") // note from person 2
+  media          String    @default("[]") // JSON [{ type, url, thumbUrl, w, h }]
+  reactions      String    @default("[]") // JSON [{ by, emoji }]
+  tags           String    @default("[]")
+  isFavorite     Boolean   @default(false)
+  unlockAt       DateTime? // time capsule — hidden until this date
+  authorId       Int?
+  author         User?     @relation(fields: [authorId], references: [id])
+  createdAt      DateTime  @default(now())
+  @@index([date])
+}
+
+// A media object stored in Cloudflare R2 (audit + reuse).
+model MediaAsset {
+  id        String   @id @default(cuid())
+  key       String   @unique // R2 object key
+  url       String // public URL
+  type      String   @default("IMAGE") // IMAGE | VIDEO
+  width     Int      @default(0)
+  height    Int      @default(0)
+  createdAt DateTime @default(now())
+}
