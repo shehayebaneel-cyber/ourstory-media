@@ -1,4 +1,5 @@
-const BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
+const BASE = (import.meta.env.VITE_API_URL as string | undefined)
+  ?? (import.meta.env.DEV ? "" : "https://ourstory-api.onrender.com");
 const TOKEN_KEY = "ourstory_token";
 
 export const getToken = () => localStorage.getItem(TOKEN_KEY) ?? "";
