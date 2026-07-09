@@ -227,6 +227,22 @@ async function withGeocode(b: Record<string, unknown>, existing?: { location: st
   return d;
 }
 
+// Reverse geocoding — turn device GPS coords into a readable place name.
+app.get("/api/geocode/reverse", requireAuth, async (req, res) => {
+  const lat = NUM(req.query.lat), lng = NUM(req.query.lng);
+  if (!lat && !lng) return res.json({ name: "" });
+  try {
+    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&zoom=16&lat=${lat}&lon=${lng}`, { headers: { "User-Agent": "OurStory/1.0 (private couple app)" } });
+    const j = (await r.json()) as { display_name?: string; address?: Record<string, string> };
+    const a = j.address || {};
+    const place = a.tourism || a.leisure || a.amenity || a.building || a.road || a.neighbourhood || a.suburb;
+    const city = a.city || a.town || a.village || a.municipality || a.county;
+    const parts = [place, city, a.country].filter(Boolean);
+    const name = [...new Set(parts)].slice(0, 3).join(", ") || j.display_name || "";
+    res.json({ name });
+  } catch { res.json({ name: "" }); }
+});
+
 // ---- Media uploads (direct-to-R2 via presigned URL) ----
 app.post("/api/media/upload-url", requireAuth, async (req, res) => {
   if (!r2Configured()) return res.status(503).json({ error: "Media storage isn't connected yet." });

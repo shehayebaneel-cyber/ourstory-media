@@ -4,7 +4,7 @@ import { pretty, todayStr } from "../lib/util.ts";
 import { uploadFile } from "../lib/upload.ts";
 import { MemoryCard } from "../components/MemoryCard.tsx";
 import { EmptyState } from "../components/EmptyState.tsx";
-import { BookOpen, X } from "lucide-react";
+import { BookOpen, X, MapPin } from "lucide-react";
 import type { Media, Memory } from "../types.ts";
 
 const REACTIONS = ["❤️", "😂", "🥹", "😍", "😭", "⭐"];
@@ -44,7 +44,27 @@ function MemoryForm({ memory, onClose, onSaved }: { memory: Memory | null; onClo
   const [media, setMedia] = useState<Media[]>(memory?.media ?? []);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [locating, setLocating] = useState(false);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [err, setErr] = useState("");
+
+  function pinCurrentLocation() {
+    if (!navigator.geolocation) { setErr("Location isn't available on this device — you can type it instead."); return; }
+    setLocating(true); setErr("");
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude, lng = pos.coords.longitude;
+        setCoords({ lat, lng });
+        try {
+          const r = await api.get<{ name: string }>(`/api/geocode/reverse?lat=${lat}&lng=${lng}`);
+          setF((prev) => ({ ...prev, location: r.name || "My current location" }));
+        } catch { setF((prev) => ({ ...prev, location: "My current location" })); }
+        finally { setLocating(false); }
+      },
+      () => { setErr("Couldn't get your location — please type it instead."); setLocating(false); },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  }
 
   async function pick(e: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
@@ -58,7 +78,8 @@ function MemoryForm({ memory, onClose, onSaved }: { memory: Memory | null; onClo
     e.preventDefault();
     if (!f.title.trim()) { setErr("Give it a title 🤍"); return; }
     setBusy(true); setErr("");
-    try { if (memory) await api.patch(`/api/memories/${memory.id}`, { ...f, media }); else await api.post("/api/memories", { ...f, media }); onSaved(); }
+    const payload = { ...f, media, ...(coords ? coords : {}) };
+    try { if (memory) await api.patch(`/api/memories/${memory.id}`, payload); else await api.post("/api/memories", payload); onSaved(); }
     catch (e2) { setErr(e2 instanceof Error ? e2.message : "Couldn't save."); setBusy(false); }
   }
 
@@ -72,7 +93,13 @@ function MemoryForm({ memory, onClose, onSaved }: { memory: Memory | null; onClo
             <input type="date" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} className="input" />
             <input type="time" value={f.time} onChange={(e) => setF({ ...f, time: e.target.value })} className="input" />
           </div>
-          <input value={f.location} onChange={(e) => setF({ ...f, location: e.target.value })} placeholder="Location" className="input" />
+          <div>
+            <div className="flex gap-2">
+              <input value={f.location} onChange={(e) => { setF({ ...f, location: e.target.value }); setCoords(null); }} placeholder="Location — type it, or tap 📍" className="input flex-1" />
+              <button type="button" onClick={pinCurrentLocation} disabled={locating} className="btn btn-ghost flex shrink-0 items-center gap-1 px-3 disabled:opacity-60" title="Use my current location"><MapPin className="h-4 w-4" />{locating ? "…" : "Current"}</button>
+            </div>
+            {coords && <p className="mt-1 flex items-center gap-1 text-xs font-medium text-rose"><MapPin className="h-3 w-3" /> Pinned to your current location</p>}
+          </div>
           <select value={f.mood} onChange={(e) => setF({ ...f, mood: e.target.value })} className="input"><option value="">Mood…</option>{MOODS.map((m) => <option key={m} value={m}>{m}</option>)}</select>
           <label className="block text-sm text-muted">Rating: <b className="text-ink">{f.rating}/10</b><input type="range" min={0} max={10} value={f.rating} onChange={(e) => setF({ ...f, rating: Number(e.target.value) })} className="w-full accent-rose" /></label>
           <textarea rows={3} value={f.story} onChange={(e) => setF({ ...f, story: e.target.value })} placeholder="The story of the day…" className="input" />
