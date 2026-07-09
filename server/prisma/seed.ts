@@ -13,7 +13,7 @@ async function main() {
   for (const u of users) {
     await prisma.user.upsert({ where: { email: u.email }, create: { ...u, passwordHash: await bcrypt.hash(pw, 10) }, update: { name: u.name } });
   }
-  await prisma.setting.upsert({ where: { key: "startDate" }, create: { key: "startDate", value: process.env.SEED_START_DATE || "2020-01-01" }, update: {} });
+  await prisma.setting.upsert({ where: { key: "startDate" }, create: { key: "startDate", value: process.env.SEED_START_DATE || "2020-01-01" }, update: { value: process.env.SEED_START_DATE || "2020-01-01" } });
   console.log(`Seeded ${users.length} accounts (${users.map((u) => u.email).join(", ")}). Password: ${pw}`);
   await prisma.$disconnect();
 }

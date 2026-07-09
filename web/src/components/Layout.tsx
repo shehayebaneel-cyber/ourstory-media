@@ -7,6 +7,8 @@ const NAV = [
   { to: "/", label: "Home", icon: "🏠" },
   { to: "/timeline", label: "Timeline", icon: "✦" },
   { to: "/journal", label: "Journal", icon: "📖" },
+  { to: "/gallery", label: "Gallery", icon: "🖼️" },
+  { to: "/more", label: "Explore", icon: "✨" },
 ];
 
 export function Layout({ children }: { children: ReactNode }) {

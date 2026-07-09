@@ -5,6 +5,12 @@ import { Login } from "./pages/Login.tsx";
 import { Home } from "./pages/Home.tsx";
 import { Timeline } from "./pages/Timeline.tsx";
 import { Journal } from "./pages/Journal.tsx";
+import { Gallery } from "./pages/Gallery.tsx";
+import { Bucket } from "./pages/Bucket.tsx";
+import { Letters } from "./pages/Letters.tsx";
+import { Countdowns } from "./pages/Countdowns.tsx";
+import { Favorites } from "./pages/Favorites.tsx";
+import { More } from "./pages/More.tsx";
 
 export default function App() {
   const { user, loading } = useAuth();
@@ -16,6 +22,12 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/timeline" element={<Timeline />} />
         <Route path="/journal" element={<Journal />} />
+        <Route path="/gallery" element={<Gallery />} />
+        <Route path="/bucket" element={<Bucket />} />
+        <Route path="/letters" element={<Letters />} />
+        <Route path="/countdowns" element={<Countdowns />} />
+        <Route path="/favorites" element={<Favorites />} />
+        <Route path="/more" element={<More />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

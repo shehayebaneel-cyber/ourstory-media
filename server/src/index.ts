@@ -202,5 +202,75 @@ app.post("/api/media", requireAuth, async (req, res) => {
   res.json(asset);
 });
 
+// ---- Bucket list ----
+app.get("/api/bucket", requireAuth, async (_req, res) => res.json(await prisma.bucketItem.findMany({ orderBy: [{ done: "asc" }, { createdAt: "desc" }] })));
+app.post("/api/bucket", requireAuth, async (req, res) => {
+  const b = req.body ?? {};
+  if (!STR(b.title, 200)) return res.status(400).json({ error: "Add a title." });
+  res.json(await prisma.bucketItem.create({ data: { title: STR(b.title, 200), category: STR(b.category, 40), notes: STR(b.notes, 1000) } }));
+});
+app.patch("/api/bucket/:id", requireAuth, async (req, res) => {
+  const b = req.body ?? {}; const data: Record<string, unknown> = {};
+  if (b.title !== undefined) data.title = STR(b.title, 200);
+  if (b.category !== undefined) data.category = STR(b.category, 40);
+  if (b.notes !== undefined) data.notes = STR(b.notes, 1000);
+  if (b.done !== undefined) { data.done = !!b.done; data.doneAt = b.done ? new Date() : null; }
+  res.json(await prisma.bucketItem.update({ where: { id: STR(req.params.id, 40) }, data }));
+});
+app.delete("/api/bucket/:id", requireAuth, async (req, res) => { await prisma.bucketItem.delete({ where: { id: STR(req.params.id, 40) } }).catch(() => {}); res.json({ ok: true }); });
+
+// ---- Love letters (can be sealed until an unlock date) ----
+app.get("/api/letters", requireAuth, async (_req, res) => {
+  const now = new Date();
+  res.json((await prisma.letter.findMany({ orderBy: { createdAt: "desc" } })).map((l) => {
+    const sealed = !!(l.unlockAt && l.unlockAt > now);
+    return sealed
+      ? { id: l.id, fromName: l.fromName, toName: l.toName, title: l.title, body: "", sealed: true, unlockAt: l.unlockAt, readAt: l.readAt, createdAt: l.createdAt }
+      : { ...l, sealed: false };
+  }));
+});
+app.post("/api/letters", requireAuth, async (req, res) => {
+  const b = req.body ?? {};
+  if (!STR(b.body, 20000)) return res.status(400).json({ error: "Write your letter first." });
+  const me = await prisma.user.findUnique({ where: { id: userOf(req) } });
+  res.json(await prisma.letter.create({ data: {
+    fromName: STR(b.fromName, 60) || me?.name || "Me", toName: STR(b.toName, 60),
+    title: STR(b.title, 160), body: STR(b.body, 20000),
+    unlockAt: isDate(String(b.unlockAt)) ? new Date(String(b.unlockAt) + "T00:00:00") : null,
+  } }));
+});
+app.patch("/api/letters/:id", requireAuth, async (req, res) => {
+  const data: Record<string, unknown> = {};
+  if (req.body?.read) data.readAt = new Date();
+  res.json(await prisma.letter.update({ where: { id: STR(req.params.id, 40) }, data }));
+});
+app.delete("/api/letters/:id", requireAuth, async (req, res) => { await prisma.letter.delete({ where: { id: STR(req.params.id, 40) } }).catch(() => {}); res.json({ ok: true }); });
+
+// ---- Countdowns ----
+app.get("/api/countdowns", requireAuth, async (_req, res) => res.json(await prisma.countdown.findMany({ orderBy: { date: "asc" } })));
+app.post("/api/countdowns", requireAuth, async (req, res) => {
+  const b = req.body ?? {};
+  if (!isDate(String(b.date))) return res.status(400).json({ error: "Pick a date." });
+  if (!STR(b.title, 160)) return res.status(400).json({ error: "Add a title." });
+  res.json(await prisma.countdown.create({ data: { title: STR(b.title, 160), date: STR(b.date, 10), emoji: STR(b.emoji, 8) || "🎉" } }));
+});
+app.delete("/api/countdowns/:id", requireAuth, async (req, res) => { await prisma.countdown.delete({ where: { id: STR(req.params.id, 40) } }).catch(() => {}); res.json({ ok: true }); });
+
+// ---- Gallery (every photo/video across memories + milestones) ----
+app.get("/api/gallery", requireAuth, async (_req, res) => {
+  const [memories, milestones] = await Promise.all([
+    prisma.memory.findMany({ where: { OR: [{ unlockAt: null }, { unlockAt: { lte: new Date() } }] }, orderBy: { date: "desc" }, select: { id: true, title: true, date: true, media: true } }),
+    prisma.milestone.findMany({ orderBy: { date: "desc" }, select: { id: true, title: true, date: true, media: true } }),
+  ]);
+  const out: { url: string; type?: string; source: string; refId: string; title: string; date: string }[] = [];
+  for (const m of memories) for (const x of parseArr(m.media) as { url: string; type?: string }[]) if (x?.url) out.push({ ...x, source: "memory", refId: m.id, title: m.title, date: m.date });
+  for (const m of milestones) for (const x of parseArr(m.media) as { url: string; type?: string }[]) if (x?.url) out.push({ ...x, source: "milestone", refId: m.id, title: m.title, date: m.date });
+  out.sort((a, b) => (a.date < b.date ? 1 : -1));
+  res.json(out);
+});
+
+// ---- Favorites (starred memories) ----
+app.get("/api/favorites", requireAuth, async (_req, res) => res.json((await prisma.memory.findMany({ where: { isFavorite: true }, orderBy: { date: "desc" } })).map(shapeMemory)));
+
 const port = Number(process.env.PORT) || 4400;
 app.listen(port, () => console.log(`OurStory API on http://localhost:${port} · R2 ${r2Configured() ? "connected" : "NOT configured"}`));

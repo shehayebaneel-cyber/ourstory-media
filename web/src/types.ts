@@ -9,6 +9,11 @@ export type Memory = {
 
 export type Milestone = { id: string; title: string; date: string; description: string; location: string; tags: string[]; media: Media[] };
 
+export type BucketItem = { id: string; title: string; category: string; notes: string; done: boolean; doneAt: string | null; createdAt: string };
+export type Letter = { id: string; fromName: string; toName: string; title: string; body: string; sealed: boolean; unlockAt: string | null; readAt: string | null; createdAt: string };
+export type Countdown = { id: string; title: string; date: string; emoji: string; createdAt: string };
+export type GalleryItem = Media & { source: string; refId: string; title: string; date: string };
+
 export type HomeData = {
   users: { id: number; name: string; avatarUrl: string }[];
   startDate: string; daysTogether: number; yearsTogether: number; monthsTogether: number;

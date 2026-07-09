@@ -70,6 +70,41 @@ model Memory {
   @@index([date])
 }
 
+// Shared bucket list — things we want to do together.
+model BucketItem {
+  id        String    @id @default(cuid())
+  title     String
+  category  String    @default("") // Travel · Food · Adventure · Cozy · Someday
+  notes     String    @default("")
+  done      Boolean   @default(false)
+  doneAt    DateTime?
+  createdAt DateTime  @default(now())
+  @@index([done])
+}
+
+// Love letters the two write to each other — can be sealed until a future date.
+model Letter {
+  id        String    @id @default(cuid())
+  fromName  String
+  toName    String    @default("")
+  title     String    @default("")
+  body      String
+  unlockAt  DateTime? // sealed — hidden until this date
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  @@index([createdAt])
+}
+
+// Countdowns to upcoming moments (anniversary, trip, date night…).
+model Countdown {
+  id        String   @id @default(cuid())
+  title     String
+  date      String // YYYY-MM-DD target
+  emoji     String   @default("🎉")
+  createdAt DateTime @default(now())
+  @@index([date])
+}
+
 // A media object stored in Cloudflare R2 (audit + reuse).
 model MediaAsset {
   id        String   @id @default(cuid())
