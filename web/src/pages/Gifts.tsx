@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../lib/api.ts";
+import { EmptyState } from "../components/EmptyState.tsx";
 import type { Gift } from "../types.ts";
 
 export function Gifts() {
@@ -26,7 +27,7 @@ export function Gifts() {
           <button className="btn btn-primary w-full py-2.5">Save idea</button>
         </form>
       )}
-      {items.length === 0 ? <p className="mt-10 text-center text-muted">No gift ideas yet 🎁</p> : (
+      {items.length === 0 ? <EmptyState icon="🎁" title="No gift ideas yet" subtitle="Jot down ideas for each other so you never forget the perfect one." /> : (
         <div className="mt-5 space-y-2">
           {items.map((g) => (
             <div key={g.id} className="card flex items-center gap-3 p-3.5">

@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../lib/api.ts";
 import { pretty } from "../lib/util.ts";
+import { EmptyState } from "../components/EmptyState.tsx";
 import type { Trip } from "../types.ts";
 
 export function Trips() {
@@ -28,7 +29,7 @@ export function Trips() {
           <button className="btn btn-primary w-full py-2.5">Add trip</button>
         </form>
       )}
-      {items.length === 0 ? <p className="mt-10 text-center text-muted">No trips yet — plan your next adventure ✈️</p> : (
+      {items.length === 0 ? <EmptyState icon="✈️" title="No trips yet" subtitle="Plan your next adventure together — with a packing checklist." /> : (
         <div className="mt-5 space-y-3">{items.map((t) => <TripCard key={t.id} t={t} onPatch={patch} onDelete={() => api.del(`/api/trips/${t.id}`).then(load)} />)}</div>
       )}
     </div>

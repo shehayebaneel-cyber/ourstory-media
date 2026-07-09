@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../lib/api.ts";
+import { EmptyState } from "../components/EmptyState.tsx";
 import type { Note } from "../types.ts";
 
 export function Notes() {
@@ -21,7 +22,7 @@ export function Notes() {
         <textarea value={text} onChange={(e) => setText(e.target.value)} rows={2} placeholder={kind === "joke" ? "That thing only we find funny…" : "A little note…"} className="input" />
         <button className="btn btn-primary w-full py-2.5">Add</button>
       </form>
-      {items.length === 0 ? <p className="mt-10 text-center text-muted">Nothing yet — jot your first note 📝</p> : (
+      {items.length === 0 ? <EmptyState icon="📝" title="No notes yet" subtitle="Jot a sweet note or capture an inside joke only you two get." /> : (
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           {items.map((n) => (
             <div key={n.id} className={`card p-4 ${n.pinned ? "ring-2 ring-rose/40" : ""}`}>

@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../lib/api.ts";
+import { EmptyState } from "../components/EmptyState.tsx";
 import type { Song } from "../types.ts";
 
 export function Playlist() {
@@ -25,7 +26,7 @@ export function Playlist() {
           <button className="btn btn-primary w-full py-2.5">Add song</button>
         </form>
       )}
-      {items.length === 0 ? <p className="mt-10 text-center text-muted">No songs yet — add the first one 🎶</p> : (
+      {items.length === 0 ? <EmptyState icon="🎶" title="Your soundtrack starts here" subtitle="Add the first song that's meaningful to the two of you." /> : (
         <div className="mt-5 space-y-2">
           {items.map((s) => (
             <div key={s.id} className="card flex items-center gap-3 p-3.5">

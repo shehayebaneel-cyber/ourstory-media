@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../lib/api.ts";
 import { pretty, todayStr } from "../lib/util.ts";
+import { EmptyState } from "../components/EmptyState.tsx";
 import type { Countdown } from "../types.ts";
 
 const daysUntil = (d: string) => Math.ceil((new Date(d + "T00:00:00").getTime() - new Date(todayStr() + "T00:00:00").getTime()) / 86400000);
@@ -34,7 +35,7 @@ export function Countdowns() {
         </form>
       )}
 
-      {items.length === 0 ? <p className="mt-10 text-center text-muted">No countdowns yet — add something to look forward to 🎉</p> : (
+      {items.length === 0 ? <EmptyState icon="🎉" title="Nothing to count down to… yet" subtitle="Add an anniversary, a trip, or a date night to look forward to." /> : (
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           {items.map((c) => {
             const d = daysUntil(c.date);

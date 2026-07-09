@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../lib/api.ts";
 import { pretty, todayStr } from "../lib/util.ts";
 import { Modal } from "../components/Modal.tsx";
+import { EmptyState } from "../components/EmptyState.tsx";
 import type { Capsule } from "../types.ts";
 
 export function Capsules() {
@@ -19,7 +20,7 @@ export function Capsules() {
       </div>
       <p className="mt-1 text-sm text-muted">Messages sealed until a future date 🔒</p>
 
-      {items.length === 0 ? <p className="mt-10 text-center text-muted">No capsules yet — seal a message for the future 💌</p> : (
+      {items.length === 0 ? <EmptyState icon="⏳" title="No capsules yet" subtitle="Seal a message or memory to open together on a future date." /> : (
         <div className="mt-5 space-y-3">
           {items.map((c) => (
             <button key={c.id} onClick={() => { if (!c.sealed) setViewing(c); }} className={`card block w-full p-4 text-left transition ${c.sealed ? "opacity-80" : "hover:border-rose"}`}>
