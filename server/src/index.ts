@@ -232,7 +232,7 @@ app.get("/api/geocode/reverse", requireAuth, async (req, res) => {
   const lat = NUM(req.query.lat), lng = NUM(req.query.lng);
   if (!lat && !lng) return res.json({ name: "" });
   try {
-    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&zoom=16&lat=${lat}&lon=${lng}`, { headers: { "User-Agent": "OurStory/1.0 (private couple app)" } });
+    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&accept-language=en&zoom=16&lat=${lat}&lon=${lng}`, { headers: { "User-Agent": "OurStory/1.0 (private couple app)" } });
     const j = (await r.json()) as { display_name?: string; address?: Record<string, string> };
     const a = j.address || {};
     const place = a.tourism || a.leisure || a.amenity || a.building || a.road || a.neighbourhood || a.suburb;
