@@ -39,7 +39,7 @@ export function Home() {
         <div className="flex -space-x-2">
           {d.users.map((u) => u.avatarUrl
             ? <img key={u.id} src={u.avatarUrl} alt="" className="h-11 w-11 rounded-full border-2 border-surface object-cover" />
-            : <span key={u.id} className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-surface bg-rose-soft font-display font-bold text-rose">{u.name.slice(0, 1)}</span>)}
+            : <span key={u.id} className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-surface bg-rose-soft font-display font-bold text-rose">{u.name.slice(0, 1).toUpperCase()}</span>)}
         </div>
         <div>
           <p className="text-sm text-muted">Welcome back{user ? `, ${user.name}` : ""} 🤍</p>

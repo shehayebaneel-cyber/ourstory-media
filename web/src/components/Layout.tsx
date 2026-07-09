@@ -1,8 +1,9 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/Auth.tsx";
 import { useTheme } from "../context/Theme.tsx";
 import { LoveAmbiance } from "./LoveAmbiance.tsx";
+import { ProfileModal } from "./ProfileModal.tsx";
 import { Home as HomeIcon, CalendarHeart, BookOpen, Images, Compass, Sun, Moon } from "lucide-react";
 
 const NAV = [
@@ -14,9 +15,10 @@ const NAV = [
 ];
 
 export function Layout({ children }: { children: ReactNode }) {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { dark, toggle } = useTheme();
   const { pathname } = useLocation();
+  const [profileOpen, setProfileOpen] = useState(false);
   return (
     <div className="min-h-screen pb-24">
       <LoveAmbiance />
@@ -25,9 +27,9 @@ export function Layout({ children }: { children: ReactNode }) {
           <Link to="/" className="font-display text-2xl font-bold leading-none text-ink">Our <span className="italic text-rose">Story</span></Link>
           <div className="flex items-center gap-2">
             <button onClick={toggle} aria-label="Toggle theme" className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-2 text-ink transition active:scale-90">{dark ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}</button>
-            <button onClick={logout} title="Log out" className="flex items-center gap-2 rounded-full bg-surface-2 py-1 pe-3 ps-1 text-sm font-semibold text-ink transition active:scale-95">
-              {user?.avatarUrl ? <img src={user.avatarUrl} alt="" className="h-7 w-7 rounded-full object-cover" /> : <span className="flex h-7 w-7 items-center justify-center rounded-full bg-rose-soft text-rose">{user?.name.slice(0, 1)}</span>}
-              <span className="hidden text-muted sm:inline">Log out</span>
+            <button onClick={() => setProfileOpen(true)} title="Your profile" className="flex items-center gap-2 rounded-full bg-surface-2 py-1 pe-3 ps-1 text-sm font-semibold text-ink transition active:scale-95">
+              {user?.avatarUrl ? <img src={user.avatarUrl} alt="" className="h-7 w-7 rounded-full object-cover" /> : <span className="flex h-7 w-7 items-center justify-center rounded-full bg-rose-soft text-rose">{user?.name.slice(0, 1).toUpperCase()}</span>}
+              <span className="hidden text-ink sm:inline">{user?.name}</span>
             </button>
           </div>
         </div>
@@ -50,6 +52,8 @@ export function Layout({ children }: { children: ReactNode }) {
           })}
         </div>
       </nav>
+
+      {profileOpen && <ProfileModal onClose={() => setProfileOpen(false)} />}
     </div>
   );
 }
