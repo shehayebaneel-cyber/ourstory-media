@@ -41,6 +41,25 @@ app.post("/api/auth/login", async (req, res) => {
   res.json({ token: signToken(u.id), user: { id: u.id, name: u.name, email: u.email, avatarUrl: u.avatarUrl } });
 });
 
+// Passcode login — matches the code against each person's stored passcode (no email needed).
+app.post("/api/auth/passcode", async (req, res) => {
+  const code = String(req.body?.code ?? "").trim();
+  if (!code) return res.status(400).json({ error: "Enter your passcode." });
+  for (const u of await prisma.user.findMany()) {
+    if (u.passwordHash && (await bcrypt.compare(code, u.passwordHash))) {
+      return res.json({ token: signToken(u.id), user: { id: u.id, name: u.name, email: u.email, avatarUrl: u.avatarUrl } });
+    }
+  }
+  res.status(401).json({ error: "Wrong passcode." });
+});
+// Set your own passcode.
+app.post("/api/me/passcode", requireAuth, async (req, res) => {
+  const code = String(req.body?.code ?? "").trim();
+  if (code.length < 4) return res.status(400).json({ error: "Passcode must be at least 4 characters." });
+  await prisma.user.update({ where: { id: userOf(req) }, data: { passwordHash: await bcrypt.hash(code, 10) } });
+  res.json({ ok: true });
+});
+
 app.get("/api/me", requireAuth, async (req, res) => {
   const u = await prisma.user.findUnique({ where: { id: userOf(req) } });
   if (!u) return res.status(404).json({ error: "Not found." });

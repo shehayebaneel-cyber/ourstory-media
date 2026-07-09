@@ -12,6 +12,8 @@ export function ProfileModal({ onClose }: { onClose: () => void }) {
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [err, setErr] = useState("");
+  const [passcode, setPasscode] = useState("");
+  const [pcMsg, setPcMsg] = useState("");
 
   async function pick(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -26,6 +28,12 @@ export function ProfileModal({ onClose }: { onClose: () => void }) {
     try { await api.patch("/api/me", { name: name.trim(), avatarUrl }); refresh(); onClose(); }
     catch { setErr("Couldn't save."); }
     finally { setBusy(false); }
+  }
+  async function savePasscode() {
+    setErr(""); setPcMsg("");
+    if (passcode.trim().length < 4) { setErr("Passcode must be at least 4 characters."); return; }
+    try { await api.post("/api/me/passcode", { code: passcode.trim() }); setPasscode(""); setPcMsg("Passcode updated ✓"); }
+    catch { setErr("Couldn't update passcode."); }
   }
 
   return (
@@ -44,6 +52,15 @@ export function ProfileModal({ onClose }: { onClose: () => void }) {
       <label className="mt-5 block text-sm font-semibold text-muted">Your name
         <input value={name} onChange={(e) => setName(e.target.value)} className="input mt-1" />
       </label>
+
+      <div className="mt-4">
+        <p className="text-sm font-semibold text-muted">Change your passcode</p>
+        <div className="mt-1 flex gap-2">
+          <input value={passcode} onChange={(e) => { setPasscode(e.target.value); setPcMsg(""); }} type="password" inputMode="numeric" placeholder="New passcode" className="input" />
+          <button type="button" onClick={savePasscode} className="btn btn-ghost shrink-0 px-4">Set</button>
+        </div>
+        {pcMsg && <p className="mt-1 text-xs font-medium text-emerald-600">{pcMsg}</p>}
+      </div>
 
       {err && <p className="mt-3 text-sm font-medium text-red-600">{err}</p>}
 
