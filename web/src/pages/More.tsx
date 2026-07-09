@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 
 const LINKS = [
   { to: "/gallery", label: "Gallery", icon: "🖼️", desc: "All our photos & videos" },
+  { to: "/map", label: "Map", icon: "🗺️", desc: "Places we've been together" },
   { to: "/bucket", label: "Bucket list", icon: "✨", desc: "Dreams to do together" },
   { to: "/letters", label: "Love letters", icon: "💌", desc: "Words for each other" },
   { to: "/countdowns", label: "Countdowns", icon: "⏳", desc: "Moments we're waiting for" },

@@ -6,6 +6,7 @@ import { Home } from "./pages/Home.tsx";
 import { Timeline } from "./pages/Timeline.tsx";
 import { Journal } from "./pages/Journal.tsx";
 import { Gallery } from "./pages/Gallery.tsx";
+import { MapPage } from "./pages/MapPage.tsx";
 import { Bucket } from "./pages/Bucket.tsx";
 import { Letters } from "./pages/Letters.tsx";
 import { Countdowns } from "./pages/Countdowns.tsx";
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="/timeline" element={<Timeline />} />
         <Route path="/journal" element={<Journal />} />
         <Route path="/gallery" element={<Gallery />} />
+        <Route path="/map" element={<MapPage />} />
         <Route path="/bucket" element={<Bucket />} />
         <Route path="/letters" element={<Letters />} />
         <Route path="/countdowns" element={<Countdowns />} />

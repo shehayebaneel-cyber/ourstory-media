@@ -156,10 +156,12 @@ app.get("/api/memories/:id", requireAuth, async (req, res) => {
 app.post("/api/memories", requireAuth, async (req, res) => {
   const b = req.body ?? {};
   if (!STR(b.title) || !isDate(STR(b.date, 10))) return res.status(400).json({ error: "Title and a valid date are required." });
-  res.status(201).json(shapeMemory(await prisma.memory.create({ data: { ...memoryData(b), authorId: userOf(req) } as Prisma.MemoryUncheckedCreateInput })));
+  res.status(201).json(shapeMemory(await prisma.memory.create({ data: { ...(await withGeocode(b)), authorId: userOf(req) } as Prisma.MemoryUncheckedCreateInput })));
 });
 app.patch("/api/memories/:id", requireAuth, async (req, res) => {
-  res.json(shapeMemory(await prisma.memory.update({ where: { id: STR(req.params.id, 40) }, data: memoryData(req.body ?? {}) as Prisma.MemoryUncheckedUpdateInput })));
+  const b = req.body ?? {};
+  const existing = await prisma.memory.findUnique({ where: { id: STR(req.params.id, 40) }, select: { location: true, lat: true, lng: true } });
+  res.json(shapeMemory(await prisma.memory.update({ where: { id: STR(req.params.id, 40) }, data: (await withGeocode(b, existing ?? undefined)) as Prisma.MemoryUncheckedUpdateInput })));
 });
 app.delete("/api/memories/:id", requireAuth, async (req, res) => { await prisma.memory.delete({ where: { id: STR(req.params.id, 40) } }).catch(() => {}); res.json({ ok: true }); });
 app.post("/api/memories/:id/react", requireAuth, async (req, res) => {
@@ -182,6 +184,27 @@ function memoryData(b: Record<string, unknown>) {
   if (b.unlockAt !== undefined) d.unlockAt = b.unlockAt ? new Date(String(b.unlockAt)) : null;
   if (b.media !== undefined) d.media = JSON.stringify(Array.isArray(b.media) ? b.media : []);
   if (b.tags !== undefined) d.tags = JSON.stringify(Array.isArray(b.tags) ? b.tags.map((t: unknown) => STR(t, 30)).filter(Boolean) : []);
+  return d;
+}
+
+// Free best-effort geocoding (OpenStreetMap Nominatim) so a typed location gets pinned on the map.
+async function geocode(q: string): Promise<{ lat: number; lng: number } | null> {
+  if (!q.trim()) return null;
+  try {
+    const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`, { headers: { "User-Agent": "OurStory/1.0 (private couple app)" } });
+    const arr = (await r.json()) as { lat: string; lon: string }[];
+    if (Array.isArray(arr) && arr[0]) return { lat: Number(arr[0].lat), lng: Number(arr[0].lon) };
+  } catch { /* ignore — pin is optional */ }
+  return null;
+}
+async function withGeocode(b: Record<string, unknown>, existing?: { location: string; lat: number | null; lng: number | null }) {
+  const d = memoryData(b);
+  const loc = d.location as string | undefined;
+  const explicit = b.lat !== undefined || b.lng !== undefined;
+  if (loc && !explicit && loc !== existing?.location) {
+    const g = await geocode(loc);
+    if (g) { d.lat = g.lat; d.lng = g.lng; }
+  }
   return d;
 }
 
@@ -271,6 +294,15 @@ app.get("/api/gallery", requireAuth, async (_req, res) => {
 
 // ---- Favorites (starred memories) ----
 app.get("/api/favorites", requireAuth, async (_req, res) => res.json((await prisma.memory.findMany({ where: { isFavorite: true }, orderBy: { date: "desc" } })).map(shapeMemory)));
+
+// ---- Places (memory locations for the map) ----
+app.get("/api/places", requireAuth, async (_req, res) => {
+  const mems = await prisma.memory.findMany({
+    where: { lat: { not: null }, lng: { not: null }, OR: [{ unlockAt: null }, { unlockAt: { lte: new Date() } }] },
+    orderBy: { date: "desc" }, select: { id: true, title: true, date: true, location: true, lat: true, lng: true, media: true },
+  });
+  res.json(mems.map((m) => ({ id: m.id, title: m.title, date: m.date, location: m.location, lat: m.lat, lng: m.lng, photo: ((parseArr(m.media)[0] as { url?: string }) || {}).url || "" })));
+});
 
 const port = Number(process.env.PORT) || 4400;
 app.listen(port, () => console.log(`OurStory API on http://localhost:${port} · R2 ${r2Configured() ? "connected" : "NOT configured"}`));
