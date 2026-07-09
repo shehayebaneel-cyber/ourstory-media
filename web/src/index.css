@@ -5,8 +5,8 @@
   --surface: #ffffff;
   --surface-2: #f7ece7;
   --ink: #3b2b31;       /* deep warm plum-brown */
-  --muted: #9c8188;
-  --border: #f0e0da;
+  --muted: #7d626a;     /* darker for readable secondary text */
+  --border: #ecdad3;
   --rose: #e0849a;      /* primary */
   --rose-deep: #c96a83;
   --rose-soft: #fbe7ec;
@@ -17,7 +17,7 @@
   --surface: #211a28;
   --surface-2: #2b2233;
   --ink: #f3e9ee;
-  --muted: #a996a3;
+  --muted: #bcaab5;     /* lighter for readable secondary text on dark */
   --border: #33283b;
   --rose: #e78ba1;
   --rose-deep: #f0a7b9;
@@ -62,11 +62,40 @@ body {
 .lift:hover { transform: translateY(-4px); }
 
 @layer components {
-  .btn { @apply inline-flex items-center justify-center gap-2 rounded-full font-semibold transition active:scale-[0.97]; }
-  .btn-primary { @apply bg-rose text-white hover:bg-rose-deep; box-shadow: 0 12px 26px -12px rgba(224, 132, 154, 0.6); }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-full font-semibold; transition: transform 0.2s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.2s ease, background 0.2s ease; }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { @apply bg-rose text-white hover:bg-rose-deep; box-shadow: 0 12px 26px -12px rgba(224, 132, 154, 0.55); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 18px 34px -12px rgba(224, 132, 154, 0.7); }
   .btn-ghost { @apply border border-border bg-surface text-ink hover:bg-surface-2; }
-  .card { @apply rounded-3xl border border-border bg-surface; box-shadow: 0 20px 48px -28px rgba(60, 30, 40, 0.22); }
+  .card { @apply rounded-3xl border border-border bg-surface; box-shadow: 0 16px 42px -26px rgba(224, 132, 154, 0.32); }
   .input { @apply w-full rounded-2xl border border-border bg-surface px-4 py-3 text-ink outline-none transition placeholder:text-muted/70 focus:border-rose; }
   .chip { @apply rounded-full border border-border bg-surface px-3 py-1 text-sm font-medium text-ink transition; }
   .chip-active { @apply border-rose bg-rose text-white; }
 }
+
+/* Soft rose focus ring instead of the browser's black outline. */
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rose) 35%, transparent);
+}
+/* Subtle card variants for visual hierarchy. */
+.card-love { background: linear-gradient(160deg, var(--rose-soft), var(--surface) 72%); }
+.card-cream { background: color-mix(in srgb, var(--gold) 9%, var(--surface)); }
+.card-tint { background: var(--surface-2); box-shadow: none; }
+.card-lift { transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.25s; }
+.card-lift:hover { transform: translateY(-3px); box-shadow: 0 22px 48px -24px rgba(224, 132, 154, 0.4); }
+
+/* Floating love ambiance — 3D-style hearts & butterflies drifting up the screen. */
+.love-layer { perspective: 700px; }
+.love-float { position: absolute; bottom: -8vh; animation: loveDrift linear infinite; will-change: transform, opacity; }
+@keyframes loveDrift {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  10%  { opacity: var(--peak, 0.7); }
+  88%  { opacity: var(--peak, 0.7); }
+  100% { transform: translate3d(var(--sway, 24px), -118vh, 0); opacity: 0; }
+}
+.love-beat { display: inline-block; animation: loveBeat 1.05s ease-in-out infinite; filter: drop-shadow(0 5px 7px rgba(224, 132, 154, 0.45)); }
+@keyframes loveBeat { 0%, 100% { transform: scale(1) rotate(-6deg); } 50% { transform: scale(1.28) rotate(6deg); } }
+.love-flap { display: inline-block; transform-style: preserve-3d; animation: loveFlap 0.4s ease-in-out infinite; filter: drop-shadow(0 4px 6px rgba(60, 30, 40, 0.2)); }
+@keyframes loveFlap { 0%, 100% { transform: rotateY(-58deg); } 50% { transform: rotateY(58deg); } }
+@media (prefers-reduced-motion: reduce) { .love-layer { display: none; } }

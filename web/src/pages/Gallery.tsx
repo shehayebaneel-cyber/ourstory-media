@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api.ts";
+import { EmptyState } from "../components/EmptyState.tsx";
 import type { GalleryItem } from "../types.ts";
 
 const isVideo = (t?: string) => t === "VIDEO" || t === "video";
@@ -12,7 +13,7 @@ export function Gallery() {
   return (
     <div>
       <h1 className="font-display text-2xl font-bold text-ink">Gallery</h1>
-      {items.length === 0 ? <p className="mt-10 text-center text-muted">No photos yet — add some to your memories 📸</p> : (
+      {items.length === 0 ? <EmptyState icon="📸" title="No photos yet" subtitle="Add photos to your memories and they'll all gather here." /> : (
         <div className="mt-5 grid grid-cols-3 gap-1.5 sm:grid-cols-4">
           {items.map((m, i) => (
             <button key={i} onClick={() => setLightbox(m)} className="relative aspect-square overflow-hidden rounded-xl bg-surface-2">

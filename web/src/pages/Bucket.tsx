@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../lib/api.ts";
+import { EmptyState } from "../components/EmptyState.tsx";
 import type { BucketItem } from "../types.ts";
 
 const CATS = ["Travel", "Food", "Adventure", "Cozy", "Someday"];
@@ -52,7 +53,7 @@ export function Bucket() {
         {["All", ...CATS].map((c) => <button key={c} onClick={() => setFilter(c)} className={`chip shrink-0 ${filter === c ? "chip-active" : ""}`}>{c === "All" ? "All" : `${EMOJI[c]} ${c}`}</button>)}
       </div>
 
-      {shown.length === 0 ? <p className="mt-10 text-center text-muted">Nothing here yet — add your first dream ✨</p> : (
+      {shown.length === 0 ? <EmptyState icon="✨" title="Your list awaits" subtitle="Add the first dream you want to chase together." /> : (
         <div className="mt-4 space-y-2">
           {shown.map((b) => (
             <div key={b.id} className="card flex items-center gap-3 p-3.5">

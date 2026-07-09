@@ -3,6 +3,7 @@ import { api } from "../lib/api.ts";
 import { useAuth } from "../context/Auth.tsx";
 import { pretty } from "../lib/util.ts";
 import { Modal } from "../components/Modal.tsx";
+import { EmptyState } from "../components/EmptyState.tsx";
 import type { Letter } from "../types.ts";
 
 export function Letters() {
@@ -26,7 +27,7 @@ export function Letters() {
         <button onClick={() => setWriting(true)} className="btn btn-primary px-4 py-2 text-sm">✍️ Write</button>
       </div>
 
-      {items.length === 0 ? <p className="mt-10 text-center text-muted">No letters yet — write one to your love 💌</p> : (
+      {items.length === 0 ? <EmptyState icon="💌" title="No letters yet" subtitle="Write the first love letter — you can even seal it until a future date." /> : (
         <div className="mt-5 space-y-3">
           {items.map((l) => (
             <button key={l.id} onClick={() => open(l)} className={`card block w-full p-4 text-left transition active:scale-[0.99] ${l.sealed ? "opacity-80" : "hover:border-rose"}`}>
