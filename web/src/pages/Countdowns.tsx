@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../lib/api.ts";
 import { pretty, todayStr } from "../lib/util.ts";
+import { Timer, X } from "lucide-react";
 import { EmptyState } from "../components/EmptyState.tsx";
 import type { Countdown } from "../types.ts";
 
@@ -22,7 +23,7 @@ export function Countdowns() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold text-ink">Countdowns</h1>
+        <h1 className="flex items-center gap-2 font-display text-2xl font-bold text-ink"><Timer className="h-6 w-6 text-rose" /> Countdowns</h1>
         <button onClick={() => setAdding((a) => !a)} className="btn btn-primary px-4 py-2 text-sm">+ Add</button>
       </div>
 
@@ -35,13 +36,13 @@ export function Countdowns() {
         </form>
       )}
 
-      {items.length === 0 ? <EmptyState icon="🎉" title="Nothing to count down to… yet" subtitle="Add an anniversary, a trip, or a date night to look forward to." /> : (
+      {items.length === 0 ? <EmptyState Icon={Timer} title="Nothing to count down to… yet" subtitle="Add an anniversary, a trip, or a date night to look forward to." /> : (
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           {items.map((c) => {
             const d = daysUntil(c.date);
             return (
               <div key={c.id} className="card relative overflow-hidden p-5">
-                <button onClick={() => api.del(`/api/countdowns/${c.id}`).then(load)} className="absolute right-3 top-3 text-muted transition hover:text-rose">✕</button>
+                <button onClick={() => api.del(`/api/countdowns/${c.id}`).then(load)} className="absolute right-3 top-3 text-muted transition hover:text-rose"><X className="h-4 w-4" /></button>
                 <p className="text-3xl">{c.emoji}</p>
                 <p className="mt-2 font-display text-lg font-bold text-ink">{c.title}</p>
                 <p className="text-sm text-muted">{pretty(c.date)}</p>

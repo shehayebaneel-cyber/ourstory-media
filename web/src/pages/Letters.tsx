@@ -3,6 +3,7 @@ import { api } from "../lib/api.ts";
 import { useAuth } from "../context/Auth.tsx";
 import { pretty } from "../lib/util.ts";
 import { Modal } from "../components/Modal.tsx";
+import { Mail } from "lucide-react";
 import { EmptyState } from "../components/EmptyState.tsx";
 import type { Letter } from "../types.ts";
 
@@ -23,11 +24,11 @@ export function Letters() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold text-ink">Love letters</h1>
-        <button onClick={() => setWriting(true)} className="btn btn-primary px-4 py-2 text-sm">✍️ Write</button>
+        <h1 className="flex items-center gap-2 font-display text-2xl font-bold text-ink"><Mail className="h-6 w-6 text-rose" /> Love letters</h1>
+        <button onClick={() => setWriting(true)} className="btn btn-primary px-4 py-2 text-sm">Write</button>
       </div>
 
-      {items.length === 0 ? <EmptyState icon="💌" title="No letters yet" subtitle="Write the first love letter — you can even seal it until a future date." /> : (
+      {items.length === 0 ? <EmptyState Icon={Mail} title="No letters yet" subtitle="Write the first love letter — you can even seal it until a future date." /> : (
         <div className="mt-5 space-y-3">
           {items.map((l) => (
             <button key={l.id} onClick={() => open(l)} className={`card block w-full p-4 text-left transition active:scale-[0.99] ${l.sealed ? "opacity-80" : "hover:border-rose"}`}>

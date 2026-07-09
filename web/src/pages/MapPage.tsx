@@ -5,6 +5,7 @@ import "leaflet/dist/leaflet.css";
 import iconUrl from "leaflet/dist/images/marker-icon.png";
 import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
 import shadowUrl from "leaflet/dist/images/marker-shadow.png";
+import { MapPin } from "lucide-react";
 import { api } from "../lib/api.ts";
 import { pretty } from "../lib/util.ts";
 
@@ -20,7 +21,7 @@ export function MapPage() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-bold text-ink">Our map</h1>
+      <h1 className="flex items-center gap-2 font-display text-2xl font-bold text-ink"><MapPin className="h-6 w-6 text-rose" /> Our map</h1>
       <p className="mt-1 text-sm text-muted">{places.length} place{places.length === 1 ? "" : "s"} we've been together 📍</p>
 
       <div className="mt-4 overflow-hidden rounded-3xl border border-border" style={{ height: "68vh" }}>

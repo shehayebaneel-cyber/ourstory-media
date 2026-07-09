@@ -3,6 +3,8 @@ import { api } from "../lib/api.ts";
 import { pretty, todayStr } from "../lib/util.ts";
 import { uploadFile } from "../lib/upload.ts";
 import { MemoryCard } from "../components/MemoryCard.tsx";
+import { EmptyState } from "../components/EmptyState.tsx";
+import { BookOpen, X } from "lucide-react";
 import type { Media, Memory } from "../types.ts";
 
 const REACTIONS = ["❤️", "😂", "🥹", "😍", "😭", "⭐"];
@@ -18,10 +20,10 @@ export function Journal() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold text-ink">Our journal</h1>
+        <h1 className="flex items-center gap-2 font-display text-2xl font-bold text-ink"><BookOpen className="h-6 w-6 text-rose" /> Our journal</h1>
         <button onClick={() => setEditing("new")} className="btn btn-primary px-4 py-2 text-sm">+ New memory</button>
       </div>
-      {items.length === 0 ? <p className="mt-10 text-center text-muted">No memories yet — write your first 📖</p> : (
+      {items.length === 0 ? <EmptyState Icon={BookOpen} title="Your story is just beginning" subtitle="Write your first memory — a moment, a photo, how the day felt." /> : (
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           {items.map((m) => <MemoryCard key={m.id} m={m} onClick={() => setViewing(m)} />)}
         </div>
@@ -63,7 +65,7 @@ function MemoryForm({ memory, onClose, onSaved }: { memory: Memory | null; onClo
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 backdrop-blur-sm sm:p-4" onClick={onClose}>
       <form onSubmit={save} className="w-full max-w-lg rounded-t-3xl bg-surface p-5 shadow-2xl sm:my-4 sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between"><p className="font-display text-lg font-bold text-ink">{memory ? "Edit memory" : "New memory"}</p><button type="button" onClick={onClose} className="text-xl text-muted">✕</button></div>
+        <div className="flex items-center justify-between"><p className="font-display text-lg font-bold text-ink">{memory ? "Edit memory" : "New memory"}</p><button type="button" onClick={onClose} className="text-xl text-muted"><X className="h-4 w-4" /></button></div>
         <div className="mt-3 space-y-2">
           <input value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="Title *" className="input" autoFocus />
           <div className="grid grid-cols-2 gap-2">
@@ -87,7 +89,7 @@ function MemoryForm({ memory, onClose, onSaved }: { memory: Memory | null; onClo
           </div>
           <div>
             <label className="btn btn-ghost w-full cursor-pointer py-2.5 text-sm">{uploading ? "Uploading…" : "📷 Add photos / videos"}<input type="file" accept="image/*,video/*" multiple hidden onChange={pick} /></label>
-            {media.length > 0 && <div className="mt-2 flex gap-2 overflow-x-auto">{media.map((x, i) => <div key={i} className="relative shrink-0"><img src={x.url} alt="" className="h-20 w-20 rounded-xl object-cover" /><button type="button" onClick={() => setMedia(media.filter((_, j) => j !== i))} className="absolute right-0.5 top-0.5 rounded-full bg-black/60 px-1.5 text-xs text-white">✕</button></div>)}</div>}
+            {media.length > 0 && <div className="mt-2 flex gap-2 overflow-x-auto">{media.map((x, i) => <div key={i} className="relative shrink-0"><img src={x.url} alt="" className="h-20 w-20 rounded-xl object-cover" /><button type="button" onClick={() => setMedia(media.filter((_, j) => j !== i))} className="absolute right-0.5 top-0.5 rounded-full bg-black/60 px-1.5 text-xs text-white"><X className="h-4 w-4" /></button></div>)}</div>}
           </div>
         </div>
         {err && <p className="mt-2 text-sm font-medium text-red-500">{err}</p>}
@@ -115,7 +117,7 @@ function MemoryDetail({ m, onClose, onChanged, onEdit, onDeleted }: { m: Memory;
         <div className="p-5">
           <div className="flex items-start justify-between gap-2">
             <div><p className="font-display text-2xl font-bold text-ink">{m.title}</p><p className="text-xs text-muted">{pretty(m.date)}{m.time ? ` · ${m.time}` : ""}{m.location ? ` · ${m.location}` : ""}{m.mood ? ` · ${m.mood}` : ""}</p></div>
-            <button onClick={onClose} className="text-xl text-muted">✕</button>
+            <button onClick={onClose} className="text-xl text-muted"><X className="h-4 w-4" /></button>
           </div>
           {m.rating > 0 && <p className="mt-1 text-sm font-semibold text-gold">Rating {m.rating}/10</p>}
           {m.media.length > 1 && <div className="mt-3 grid grid-cols-3 gap-2">{m.media.slice(1).map((x, i) => <img key={i} src={x.url} alt="" className="aspect-square w-full rounded-xl object-cover" />)}</div>}

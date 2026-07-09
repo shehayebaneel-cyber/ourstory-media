@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../lib/api.ts";
+import { Music, Play, X } from "lucide-react";
 import { EmptyState } from "../components/EmptyState.tsx";
 import type { Song } from "../types.ts";
 
@@ -14,7 +15,7 @@ export function Playlist() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold text-ink">Our playlist 🎵</h1>
+        <h1 className="flex items-center gap-2 font-display text-2xl font-bold text-ink"><Music className="h-6 w-6 text-rose" /> Our playlist</h1>
         <button onClick={() => setAdding((a) => !a)} className="btn btn-primary px-4 py-2 text-sm">+ Song</button>
       </div>
       {adding && (
@@ -26,17 +27,17 @@ export function Playlist() {
           <button className="btn btn-primary w-full py-2.5">Add song</button>
         </form>
       )}
-      {items.length === 0 ? <EmptyState icon="🎶" title="Your soundtrack starts here" subtitle="Add the first song that's meaningful to the two of you." /> : (
+      {items.length === 0 ? <EmptyState Icon={Music} title="Your soundtrack starts here" subtitle="Add the first song that's meaningful to the two of you." /> : (
         <div className="mt-5 space-y-2">
           {items.map((s) => (
             <div key={s.id} className="card flex items-center gap-3 p-3.5">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-soft text-lg">🎵</span>
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-soft text-rose"><Music className="h-5 w-5" /></span>
               <div className="min-w-0 flex-1">
                 <p className="truncate font-semibold text-ink">{s.title}</p>
                 <p className="truncate text-xs text-muted">{[s.artist, s.note].filter(Boolean).join(" · ")}</p>
               </div>
-              {s.url && <a href={s.url} target="_blank" rel="noreferrer" className="shrink-0 text-rose">▶</a>}
-              <button onClick={() => api.del(`/api/songs/${s.id}`).then(load)} className="shrink-0 px-1 text-muted hover:text-rose">✕</button>
+              {s.url && <a href={s.url} target="_blank" rel="noreferrer" className="shrink-0 text-rose"><Play className="h-4 w-4 fill-rose" /></a>}
+              <button onClick={() => api.del(`/api/songs/${s.id}`).then(load)} className="shrink-0 px-1 text-muted hover:text-rose"><X className="h-4 w-4" /></button>
             </div>
           ))}
         </div>

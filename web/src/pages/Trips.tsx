@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../lib/api.ts";
 import { pretty } from "../lib/util.ts";
+import { Plane, X, Plus } from "lucide-react";
 import { EmptyState } from "../components/EmptyState.tsx";
 import type { Trip } from "../types.ts";
 
@@ -16,7 +17,7 @@ export function Trips() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold text-ink">Trips ✈️</h1>
+        <h1 className="flex items-center gap-2 font-display text-2xl font-bold text-ink"><Plane className="h-6 w-6 text-rose" /> Trips</h1>
         <button onClick={() => setAdding((a) => !a)} className="btn btn-primary px-4 py-2 text-sm">+ Trip</button>
       </div>
       {adding && (
@@ -29,7 +30,7 @@ export function Trips() {
           <button className="btn btn-primary w-full py-2.5">Add trip</button>
         </form>
       )}
-      {items.length === 0 ? <EmptyState icon="✈️" title="No trips yet" subtitle="Plan your next adventure together — with a packing checklist." /> : (
+      {items.length === 0 ? <EmptyState Icon={Plane} title="No trips yet" subtitle="Plan your next adventure together — with a packing checklist." /> : (
         <div className="mt-5 space-y-3">{items.map((t) => <TripCard key={t.id} t={t} onPatch={patch} onDelete={() => api.del(`/api/trips/${t.id}`).then(load)} />)}</div>
       )}
     </div>
@@ -47,7 +48,7 @@ function TripCard({ t, onPatch, onDelete }: { t: Trip; onPatch: (t: Trip, b: Par
           <p className="font-display text-lg font-bold text-ink">{t.destination}</p>
           {(t.startDate || t.endDate) && <p className="text-xs text-muted">{[t.startDate && pretty(t.startDate), t.endDate && pretty(t.endDate)].filter(Boolean).join(" → ")}</p>}
         </div>
-        <button onClick={onDelete} className="text-muted hover:text-rose">✕</button>
+        <button onClick={onDelete} className="text-muted hover:text-rose"><X className="h-4 w-4" /></button>
       </div>
       {t.checklist.length > 0 && (
         <div className="mt-3 space-y-1.5">
@@ -61,7 +62,7 @@ function TripCard({ t, onPatch, onDelete }: { t: Trip; onPatch: (t: Trip, b: Par
       )}
       <div className="mt-2 flex gap-2">
         <input value={item} onChange={(e) => setItem(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addItem(); } }} placeholder="Add to checklist…" className="input !py-2 text-sm" />
-        <button onClick={addItem} className="btn btn-ghost px-3 text-sm">+</button>
+        <button onClick={addItem} className="btn btn-ghost px-3 text-sm"><Plus className="h-4 w-4" /></button>
       </div>
     </div>
   );

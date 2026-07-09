@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api.ts";
 import { pretty, todayStr } from "../lib/util.ts";
+import { CalendarHeart } from "lucide-react";
+import { EmptyState } from "../components/EmptyState.tsx";
 import type { Milestone } from "../types.ts";
 
 export function Timeline() {
@@ -13,10 +15,10 @@ export function Timeline() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold text-ink">Our timeline</h1>
+        <h1 className="flex items-center gap-2 font-display text-2xl font-bold text-ink"><CalendarHeart className="h-6 w-6 text-rose" /> Our timeline</h1>
         <button onClick={() => setOpen(true)} className="btn btn-primary px-4 py-2 text-sm">+ Add</button>
       </div>
-      {items.length === 0 ? <p className="mt-10 text-center text-muted">No milestones yet — add your first ✦</p> : (
+      {items.length === 0 ? <EmptyState Icon={CalendarHeart} title="Your timeline starts here" subtitle="Add the milestones that shaped your story — your first date, first trip, and beyond." /> : (
         <ol className="relative mt-6 border-s-2 border-rose-soft ps-5">
           {items.map((m) => (
             <li key={m.id} className="reveal mb-6">

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Search as SearchIcon } from "lucide-react";
 import { api } from "../lib/api.ts";
 import { MemoryCard } from "../components/MemoryCard.tsx";
 import type { Memory } from "../types.ts";
@@ -15,7 +16,7 @@ export function Search() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-bold text-ink">Search</h1>
+      <h1 className="flex items-center gap-2 font-display text-2xl font-bold text-ink"><SearchIcon className="h-6 w-6 text-rose" /> Search</h1>
       <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search memories, places, moods…" className="input mt-4" autoFocus />
       {q.trim() && <p className="mt-3 text-sm text-muted">{results.length} result{results.length === 1 ? "" : "s"}</p>}
       <div className="mt-4 grid gap-4 sm:grid-cols-2">{results.map((m) => <MemoryCard key={m.id} m={m} onClick={() => { /* view */ }} />)}</div>

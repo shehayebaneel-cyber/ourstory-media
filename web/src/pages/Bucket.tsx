@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../lib/api.ts";
+import { ListChecks, Check, X } from "lucide-react";
 import { EmptyState } from "../components/EmptyState.tsx";
 import type { BucketItem } from "../types.ts";
 
@@ -30,7 +31,7 @@ export function Bucket() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold text-ink">Bucket list</h1>
+        <h1 className="flex items-center gap-2 font-display text-2xl font-bold text-ink"><ListChecks className="h-6 w-6 text-rose" /> Bucket list</h1>
         <button onClick={() => setAdding((a) => !a)} className="btn btn-primary px-4 py-2 text-sm">+ Add</button>
       </div>
 
@@ -53,16 +54,16 @@ export function Bucket() {
         {["All", ...CATS].map((c) => <button key={c} onClick={() => setFilter(c)} className={`chip shrink-0 ${filter === c ? "chip-active" : ""}`}>{c === "All" ? "All" : `${EMOJI[c]} ${c}`}</button>)}
       </div>
 
-      {shown.length === 0 ? <EmptyState icon="✨" title="Your list awaits" subtitle="Add the first dream you want to chase together." /> : (
+      {shown.length === 0 ? <EmptyState Icon={ListChecks} title="Your list awaits" subtitle="Add the first dream you want to chase together." /> : (
         <div className="mt-4 space-y-2">
           {shown.map((b) => (
             <div key={b.id} className="card flex items-center gap-3 p-3.5">
-              <button onClick={() => toggle(b)} className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 text-sm transition ${b.done ? "border-rose bg-rose text-white" : "border-border text-transparent"}`}>✓</button>
+              <button onClick={() => toggle(b)} className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 transition ${b.done ? "border-rose bg-rose text-white" : "border-border text-transparent"}`}><Check className="h-4 w-4" strokeWidth={3} /></button>
               <div className="min-w-0 flex-1">
                 <p className={`font-semibold ${b.done ? "text-muted line-through" : "text-ink"}`}>{b.title}</p>
                 {b.category && <p className="text-xs text-muted">{EMOJI[b.category] ?? "•"} {b.category}</p>}
               </div>
-              <button onClick={() => remove(b)} className="shrink-0 px-1 text-muted transition hover:text-rose">✕</button>
+              <button onClick={() => remove(b)} className="shrink-0 px-1 text-muted transition hover:text-rose"><X className="h-4 w-4" /></button>
             </div>
           ))}
         </div>
