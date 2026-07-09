@@ -7,6 +7,14 @@ const LINKS = [
   { to: "/letters", label: "Love letters", icon: "💌", desc: "Words for each other" },
   { to: "/countdowns", label: "Countdowns", icon: "⏳", desc: "Moments we're waiting for" },
   { to: "/favorites", label: "Favorites", icon: "⭐", desc: "Our starred memories" },
+  { to: "/capsules", label: "Time capsules", icon: "⏳", desc: "Messages sealed for the future" },
+  { to: "/trips", label: "Trips", icon: "✈️", desc: "Plan & pack our adventures" },
+  { to: "/playlist", label: "Playlist", icon: "🎵", desc: "Songs that are ours" },
+  { to: "/notes", label: "Notes & jokes", icon: "😂", desc: "Little notes & inside jokes" },
+  { to: "/gifts", label: "Gift ideas", icon: "🎁", desc: "Ideas for each other" },
+  { to: "/random", label: "Random memory", icon: "🎲", desc: "Surprise me with a moment" },
+  { to: "/search", label: "Search", icon: "🔎", desc: "Find any memory" },
+  { to: "/stats", label: "Our stats", icon: "📊", desc: "Our relationship by the numbers" },
 ];
 
 export function More() {

@@ -304,5 +304,88 @@ app.get("/api/places", requireAuth, async (_req, res) => {
   res.json(mems.map((m) => ({ id: m.id, title: m.title, date: m.date, location: m.location, lat: m.lat, lng: m.lng, photo: ((parseArr(m.media)[0] as { url?: string }) || {}).url || "" })));
 });
 
+// ---- Playlist (songs) ----
+app.get("/api/songs", requireAuth, async (_req, res) => res.json(await prisma.song.findMany({ orderBy: { createdAt: "desc" } })));
+app.post("/api/songs", requireAuth, async (req, res) => {
+  const b = req.body ?? {}; if (!STR(b.title, 200)) return res.status(400).json({ error: "Add a title." });
+  const me = await prisma.user.findUnique({ where: { id: userOf(req) } });
+  res.json(await prisma.song.create({ data: { title: STR(b.title, 200), artist: STR(b.artist, 120), url: STR(b.url, 600), note: STR(b.note, 500), addedBy: me?.name || "" } }));
+});
+app.delete("/api/songs/:id", requireAuth, async (req, res) => { await prisma.song.delete({ where: { id: STR(req.params.id, 40) } }).catch(() => {}); res.json({ ok: true }); });
+
+// ---- Notes & inside jokes ----
+app.get("/api/notes", requireAuth, async (_req, res) => res.json(await prisma.note.findMany({ orderBy: [{ pinned: "desc" }, { createdAt: "desc" }] })));
+app.post("/api/notes", requireAuth, async (req, res) => {
+  const b = req.body ?? {}; if (!STR(b.text, 2000)) return res.status(400).json({ error: "Write something." });
+  res.json(await prisma.note.create({ data: { text: STR(b.text, 2000), kind: STR(b.kind, 10) === "joke" ? "joke" : "note" } }));
+});
+app.patch("/api/notes/:id", requireAuth, async (req, res) => {
+  const data: Record<string, unknown> = {}; if (req.body?.pinned !== undefined) data.pinned = !!req.body.pinned;
+  res.json(await prisma.note.update({ where: { id: STR(req.params.id, 40) }, data }));
+});
+app.delete("/api/notes/:id", requireAuth, async (req, res) => { await prisma.note.delete({ where: { id: STR(req.params.id, 40) } }).catch(() => {}); res.json({ ok: true }); });
+
+// ---- Trips (with a checklist) ----
+app.get("/api/trips", requireAuth, async (_req, res) => res.json((await prisma.trip.findMany({ orderBy: { createdAt: "desc" } })).map((t) => ({ ...t, checklist: parseArr(t.checklist) }))));
+app.post("/api/trips", requireAuth, async (req, res) => {
+  const b = req.body ?? {}; if (!STR(b.destination, 160)) return res.status(400).json({ error: "Where to?" });
+  const t = await prisma.trip.create({ data: { destination: STR(b.destination, 160), startDate: STR(b.startDate, 10), endDate: STR(b.endDate, 10), notes: STR(b.notes, 2000) } });
+  res.json({ ...t, checklist: [] });
+});
+app.patch("/api/trips/:id", requireAuth, async (req, res) => {
+  const b = req.body ?? {}; const data: Record<string, unknown> = {};
+  for (const k of ["destination", "startDate", "endDate", "notes"]) if (b[k] !== undefined) data[k] = STR(b[k], 2000);
+  if (b.done !== undefined) data.done = !!b.done;
+  if (Array.isArray(b.checklist)) data.checklist = JSON.stringify(b.checklist.map((c: { text?: unknown; done?: unknown }) => ({ text: STR(c?.text, 200), done: !!c?.done })).filter((c: { text: string }) => c.text));
+  const t = await prisma.trip.update({ where: { id: STR(req.params.id, 40) }, data });
+  res.json({ ...t, checklist: parseArr(t.checklist) });
+});
+app.delete("/api/trips/:id", requireAuth, async (req, res) => { await prisma.trip.delete({ where: { id: STR(req.params.id, 40) } }).catch(() => {}); res.json({ ok: true }); });
+
+// ---- Gifts ----
+app.get("/api/gifts", requireAuth, async (_req, res) => res.json(await prisma.gift.findMany({ orderBy: [{ bought: "asc" }, { createdAt: "desc" }] })));
+app.post("/api/gifts", requireAuth, async (req, res) => {
+  const b = req.body ?? {}; if (!STR(b.idea, 300)) return res.status(400).json({ error: "Add a gift idea." });
+  res.json(await prisma.gift.create({ data: { idea: STR(b.idea, 300), forName: STR(b.forName, 60), occasion: STR(b.occasion, 80), price: NUM(b.price) } }));
+});
+app.patch("/api/gifts/:id", requireAuth, async (req, res) => {
+  const data: Record<string, unknown> = {}; if (req.body?.bought !== undefined) data.bought = !!req.body.bought;
+  res.json(await prisma.gift.update({ where: { id: STR(req.params.id, 40) }, data }));
+});
+app.delete("/api/gifts/:id", requireAuth, async (req, res) => { await prisma.gift.delete({ where: { id: STR(req.params.id, 40) } }).catch(() => {}); res.json({ ok: true }); });
+
+// ---- Time capsules (memories sealed until a date) ----
+app.get("/api/capsules", requireAuth, async (_req, res) => {
+  const now = new Date();
+  const mems = await prisma.memory.findMany({ where: { unlockAt: { not: null } }, orderBy: { unlockAt: "asc" } });
+  res.json(mems.map((m) => (m.unlockAt && m.unlockAt > now) ? { id: m.id, title: m.title, sealed: true, unlockAt: m.unlockAt } : { ...shapeMemory(m), sealed: false }));
+});
+
+// ---- Statistics ----
+app.get("/api/stats", requireAuth, async (_req, res) => {
+  const [memories, milestones, letters, bucket, countdowns, songs, trips, gifts] = await Promise.all([
+    prisma.memory.findMany({ where: { OR: [{ unlockAt: null }, { unlockAt: { lte: new Date() } }] } }),
+    prisma.milestone.count(), prisma.letter.count(), prisma.bucketItem.findMany(), prisma.countdown.count(), prisma.song.count(), prisma.trip.count(), prisma.gift.count(),
+  ]);
+  let photos = 0, videos = 0, places = 0, ratingSum = 0, rated = 0;
+  const moods: Record<string, number> = {}, byMonth: Record<string, number> = {};
+  for (const m of memories) {
+    for (const x of parseArr(m.media) as { type?: string }[]) { if (x.type === "VIDEO" || x.type === "video") videos++; else photos++; }
+    if (m.lat != null && m.lng != null) places++;
+    if (m.rating > 0) { ratingSum += m.rating; rated++; }
+    if (m.mood) moods[m.mood] = (moods[m.mood] ?? 0) + 1;
+    byMonth[m.date.slice(0, 7)] = (byMonth[m.date.slice(0, 7)] ?? 0) + 1;
+  }
+  const dates = memories.map((m) => m.date).sort();
+  res.json({
+    memories: memories.length, photos, videos, places, milestones, letters, countdowns, songs, trips, gifts,
+    avgRating: rated ? Math.round((ratingSum / rated) * 10) / 10 : 0,
+    topMood: Object.entries(moods).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "",
+    bucketDone: bucket.filter((b) => b.done).length, bucketTotal: bucket.length,
+    firstDate: dates[0] ?? "", latestDate: dates[dates.length - 1] ?? "",
+    byMonth: Object.entries(byMonth).sort().map(([month, count]) => ({ month, count })),
+  });
+});
+
 const port = Number(process.env.PORT) || 4400;
 app.listen(port, () => console.log(`OurStory API on http://localhost:${port} · R2 ${r2Configured() ? "connected" : "NOT configured"}`));

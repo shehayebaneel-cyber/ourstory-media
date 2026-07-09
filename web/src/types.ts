@@ -13,6 +13,13 @@ export type BucketItem = { id: string; title: string; category: string; notes: s
 export type Letter = { id: string; fromName: string; toName: string; title: string; body: string; sealed: boolean; unlockAt: string | null; readAt: string | null; createdAt: string };
 export type Countdown = { id: string; title: string; date: string; emoji: string; createdAt: string };
 export type GalleryItem = Media & { source: string; refId: string; title: string; date: string };
+export type Song = { id: string; title: string; artist: string; url: string; note: string; addedBy: string; createdAt: string };
+export type Note = { id: string; text: string; kind: string; pinned: boolean; createdAt: string };
+export type ChecklistItem = { text: string; done: boolean };
+export type Trip = { id: string; destination: string; startDate: string; endDate: string; notes: string; checklist: ChecklistItem[]; done: boolean; createdAt: string };
+export type Gift = { id: string; forName: string; occasion: string; idea: string; bought: boolean; price: number; createdAt: string };
+export type Capsule = { id: string; title: string; sealed: boolean; unlockAt: string | null } & Partial<Memory>;
+export type Stats = { memories: number; photos: number; videos: number; places: number; milestones: number; letters: number; countdowns: number; songs: number; trips: number; gifts: number; avgRating: number; topMood: string; bucketDone: number; bucketTotal: number; firstDate: string; latestDate: string; byMonth: { month: string; count: number }[] };
 
 export type HomeData = {
   users: { id: number; name: string; avatarUrl: string }[];

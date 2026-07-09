@@ -105,6 +105,50 @@ model Countdown {
   @@index([date])
 }
 
+// Our shared playlist — songs that mean something to us.
+model Song {
+  id        String   @id @default(cuid())
+  title     String
+  artist    String   @default("")
+  url       String   @default("") // Spotify / YouTube link
+  note      String   @default("") // why it's ours
+  addedBy   String   @default("")
+  createdAt DateTime @default(now())
+}
+
+// Little notes & inside jokes.
+model Note {
+  id        String   @id @default(cuid())
+  text      String
+  kind      String   @default("note") // note | joke
+  pinned    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  @@index([kind])
+}
+
+// Trips we're planning or have taken, with a packing/to-do checklist.
+model Trip {
+  id          String   @id @default(cuid())
+  destination String
+  startDate   String   @default("") // YYYY-MM-DD
+  endDate     String   @default("")
+  notes       String   @default("")
+  checklist   String   @default("[]") // JSON [{ text, done }]
+  done        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+// Gift ideas / tracker for each other.
+model Gift {
+  id        String   @id @default(cuid())
+  forName   String   @default("")
+  occasion  String   @default("")
+  idea      String
+  bought    Boolean  @default(false)
+  price     Float    @default(0)
+  createdAt DateTime @default(now())
+}
+
 // A media object stored in Cloudflare R2 (audit + reuse).
 model MediaAsset {
   id        String   @id @default(cuid())
